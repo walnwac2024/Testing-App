@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="ur" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Dukaan Hisaab — Smart Sales Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{--bg:#F7F6F3;--card:#FFF;--border:#E5E3DC;--text:#1C1C1A;--muted:#6B6A66;--accent:#1a1a2e;--green:#1D9E75;--green-bg:#EAF3DE;--amber:#BA7517;--amber-bg:#FAEEDA;--red:#A32D2D;--red-bg:#FCEBEB;--purple:#534AB7;--purple-bg:#EEEDFE;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,.08);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;font-size:14px;}
+.screen{display:none;}.screen.active{display:block;}
+.page{max-width:480px;margin:0 auto;padding:1.5rem 1rem;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:1.25rem;box-shadow:var(--shadow);}
+.card+.card{margin-top:12px;}
+.btn{display:block;width:100%;padding:11px 16px;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;border:none;text-align:center;transition:opacity .15s;font-family:inherit;}
+.btn:hover{opacity:.85;}
+.btn-primary{background:var(--accent);color:#fff;margin-top:12px;}
+.btn-outline{background:transparent;color:var(--text);border:1px solid var(--border);margin-top:8px;}
+.btn-green{background:var(--green);color:#fff;}
+.btn-red{background:#E24B4A;color:#fff;}
+.btn-sm{width:auto;padding:6px 14px;font-size:12px;display:inline-block;margin-top:0;}
+.field{margin-bottom:14px;}
+.field label{font-size:12px;color:var(--muted);display:block;margin-bottom:5px;}
+.field input,.field select{width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:var(--bg);color:var(--text);}
+.badge{display:inline-block;font-size:11px;font-weight:500;padding:3px 10px;border-radius:20px;}
+.badge-free{background:var(--amber-bg);color:var(--amber);}
+.badge-trial{background:var(--purple-bg);color:var(--purple);}
+.badge-active{background:var(--green-bg);color:var(--green);}
+.badge-expired{background:var(--red-bg);color:var(--red);}
+.alert{padding:10px 14px;border-radius:8px;font-size:13px;margin-bottom:12px;line-height:1.6;}
+.alert-warning{background:var(--amber-bg);color:var(--amber);}
+.alert-success{background:var(--green-bg);color:var(--green);}
+.app-header{background:var(--accent);color:#fff;padding:14px 1rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:10;}
+.app-header h1{font-size:15px;font-weight:600;color:#fff;}
+.app-header .sub{font-size:11px;opacity:.65;color:#fff;margin-top:2px;}
+.header-right{display:flex;align-items:center;gap:10px;}
+.tabs{display:flex;gap:4px;background:#EEECEA;border-radius:10px;padding:4px;margin-bottom:1rem;}
+.tab-btn{flex:1;padding:8px;border:none;background:transparent;border-radius:7px;font-size:12px;font-weight:500;cursor:pointer;color:var(--muted);font-family:inherit;}
+.tab-btn.active{background:var(--card);color:var(--text);box-shadow:var(--shadow);}
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+.stat-box{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px;}
+.stat-label{font-size:11px;color:var(--muted);}
+.stat-value{font-size:20px;font-weight:600;margin-top:4px;}
+.table-wrap{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead{background:#F0EEE9;}
+th{padding:9px 12px;text-align:left;font-weight:500;color:var(--muted);font-size:11px;border-bottom:1px solid var(--border);}
+td{padding:10px 12px;border-bottom:1px solid var(--border);}
+tr:last-child td{border-bottom:none;}
+.del-btn{background:none;border:none;cursor:pointer;color:#E24B4A;font-size:16px;padding:0 4px;}
+.total-bar{background:var(--accent);border-radius:0 0 var(--radius) var(--radius);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;}
+.total-label{font-size:12px;color:rgba(255,255,255,.65);}
+.total-amount{font-size:22px;font-weight:600;color:#fff;}
+.plan-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0;}
+.plan-card{border:1.5px solid var(--border);border-radius:10px;padding:14px 10px;cursor:pointer;background:var(--card);}
+.plan-card.selected{border-color:var(--accent);background:#F0EEE9;}
+.plan-card.popular{border-color:var(--green);}
+.plan-name{font-size:13px;font-weight:600;}
+.plan-price{font-size:18px;font-weight:600;margin:6px 0 2px;}
+.plan-price span{font-size:10px;font-weight:400;color:var(--muted);}
+.plan-feat{font-size:11px;color:var(--muted);margin-top:8px;line-height:1.8;}
+.feat-yes{color:var(--green);}
+.feat-no{text-decoration:line-through;}
+.user-card{border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px;background:var(--card);}
+.user-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.user-name{font-size:14px;font-weight:600;}
+.user-email{font-size:12px;color:var(--muted);margin-top:2px;}
+.user-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);}
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:1rem;background:var(--bg);}
+.login-box{width:100%;max-width:380px;}
+.login-logo{text-align:center;margin-bottom:1.5rem;}
+.login-logo .icon{width:52px;height:52px;background:var(--accent);border-radius:14px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+.login-logo h1{font-size:22px;font-weight:700;}
+.login-logo p{font-size:13px;color:var(--muted);margin-top:4px;}
+.divider{text-align:center;font-size:12px;color:var(--muted);margin:12px 0;}
+.error-msg{color:var(--red);font-size:12px;margin-top:6px;display:none;}
+.form-3col{display:grid;grid-template-columns:2fr 1fr 1fr;gap:8px;margin-bottom:10px;}
+.form-3col input{padding:9px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);width:100%;}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;align-items:center;justify-content:center;padding:1rem;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--card);border-radius:var(--radius);padding:1.5rem;width:100%;max-width:340px;box-shadow:0 8px 32px rgba(0,0,0,.15);}
+.modal-box h3{font-size:16px;font-weight:600;margin-bottom:6px;}
+.modal-box p{font-size:13px;color:var(--muted);margin-bottom:1rem;}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:500;display:none;z-index:200;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.2);}
+.logout-btn{background:rgba(255,255,255,.15);border:none;color:#fff;font-size:12px;padding:5px 12px;border-radius:6px;cursor:pointer;font-family:inherit;}
+.lock-box{text-align:center;padding:2rem 1rem;}
+.lock-icon{font-size:40px;margin-bottom:10px;}
+.lock-box h3{font-size:16px;font-weight:600;margin-bottom:6px;}
+.lock-box p{font-size:13px;color:var(--muted);margin-bottom:1rem;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+<div class="login-wrap"><div class="login-box">
+  <div class="login-logo">
+    <div class="icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div>
+    <h1>Dukaan Hisaab</h1>
+    <p>Apni dukaan ka hisaab aasaan karo</p>
+  </div>
+  <div class="card">
+    <div class="field"><label>Email</label><input type="text" id="login-email" placeholder="ali@gmail.com"/></div>
+    <div class="field"><label>Password</label><input type="password" id="login-pass" placeholder="Password"/></div>
+    <div class="error-msg" id="login-error">❌ Galat email ya password!</div>
+    <button class="btn btn-primary" onclick="doLogin()">🔐 Login Karein</button>
+    <div class="divider">ya</div>
+    <button class="btn btn-outline" onclick="showScreen('screen-register')">✨ Naya Account — 7 Din Free Trial</button>
+  </div>
+  <p style="text-align:center;font-size:11px;color:var(--muted);margin-top:14px;">
+    <b>Admin:</b> admin@dukaan.com / admin123<br>
+    <b>Customer Demo:</b> ali@gmail.com / 1234
+  </p>
+</div></div>
+</div>
+
+<!-- REGISTER -->
+<div id="screen-register" class="screen">
+<div class="login-wrap"><div class="login-box">
+  <div class="login-logo">
+    <div class="icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div>
+    <h1>Naya Account</h1><p>7 din bilkul free!</p>
+  </div>
+  <div class="card">
+    <div class="field"><label>Dukaan ka Naam</label><input type="text" id="reg-shop" placeholder="Ali General Store"/></div>
+    <div class="field"><label>Email</label><input type="email" id="reg-email" placeholder="ali@gmail.com"/></div>
+    <div class="field"><label>WhatsApp Number</label><input type="tel" id="reg-phone" placeholder="03001234567"/></div>
+    <div class="field"><label>Password (min 6 characters)</label><input type="password" id="reg-pass" placeholder="Strong password"/></div>
+    <div class="error-msg" id="reg-error">Sab fields zaroori hain!</div>
+    <button class="btn btn-primary" onclick="doRegister()">🚀 Free Trial Shuru Karein</button>
+    <button class="btn btn-outline" onclick="showScreen('screen-login')">← Wapas Login</button>
+  </div>
+</div></div>
+</div>
+
+<!-- PLANS -->
+<div id="screen-plans" class="screen">
+<div class="page">
+  <div style="text-align:center;margin-bottom:1.5rem;"><h2 style="font-size:20px;font-weight:700;">Plan Choose Karein</h2><p style="color:var(--muted);font-size:13px;margin-top:4px;">Apni zaroorat ke mutabiq plan lein</p></div>
+  <div class="plan-grid">
+    <div class="plan-card" id="pc-free" onclick="selectPlan('free')">
+      <div class="plan-name">Free</div><div class="plan-price">Rs. 0 <span>/month</span></div>
+      <div class="plan-feat"><div class="feat-yes">✓ 10 items/din</div><div class="feat-yes">✓ Basic hisaab</div><div class="feat-no">Report nahi</div><div class="feat-no">Export nahi</div></div>
+    </div>
+    <div class="plan-card popular" id="pc-basic" onclick="selectPlan('basic')">
+      <div style="font-size:10px;background:var(--green-bg);color:var(--green);padding:2px 8px;border-radius:20px;display:inline-block;margin-bottom:6px;">⭐ Popular</div>
+      <div class="plan-name">Basic</div><div class="plan-price">Rs. 500 <span>/month</span></div>
+      <div class="plan-feat"><div class="feat-yes">✓ Unlimited items</div><div class="feat-yes">✓ Daily report</div><div class="feat-yes">✓ Print karein</div><div class="feat-no">Multi-user nahi</div></div>
+    </div>
+    <div class="plan-card" id="pc-pro" onclick="selectPlan('pro')">
+      <div class="plan-name">Pro</div><div class="plan-price">Rs. 1,500 <span>/month</span></div>
+      <div class="plan-feat"><div class="feat-yes">✓ Sab Basic features</div><div class="feat-yes">✓ 5 users</div><div class="feat-yes">✓ Analytics</div><div class="feat-yes">✓ Priority support</div></div>
+    </div>
+  </div>
+  <button class="btn btn-primary" onclick="confirmPlan()">✅ Is Plan Se Jari Rakhein</button>
+  <p style="text-align:center;font-size:12px;color:var(--muted);margin-top:10px;">Payment: EasyPaisa / JazzCash</p>
+  <button class="btn btn-outline" onclick="goToApp()">Baad Mein Upgrade Karunga →</button>
+</div>
+</div>
+
+<!-- MAIN APP -->
+<div id="screen-app" class="screen">
+  <div class="app-header">
+    <div><h1 id="header-shop">🏪 Dukaan Hisaab</h1><div class="sub" id="header-email">loading...</div></div>
+    <div class="header-right"><span class="badge" id="header-badge">Free</span><button class="logout-btn" onclick="doLogout()">Logout</button></div>
+  </div>
+  <div class="page">
+    <div id="app-alert"></div>
+    <div class="tabs">
+      <button class="tab-btn active" id="tab-hisaab" onclick="switchTab('hisaab')">📋 Hisaab</button>
+      <button class="tab-btn" id="tab-report" onclick="switchTab('report')">📊 Report</button>
+      <button class="tab-btn" id="tab-account" onclick="switchTab('account')">👤 Account</button>
+    </div>
+    <div id="content-hisaab">
+      <div class="stats-grid">
+        <div class="stat-box"><div class="stat-label">Items</div><div class="stat-value" id="st-items">0</div></div>
+        <div class="stat-box"><div class="stat-label">Sales</div><div class="stat-value" id="st-sales" style="font-size:15px;">Rs.0</div></div>
+        <div class="stat-box"><div class="stat-label">Plan</div><div class="stat-value" id="st-plan" style="font-size:13px;margin-top:6px;">Free</div></div>
+      </div>
+      <div class="card" style="border-radius:var(--radius) var(--radius) 0 0;border-bottom:none;">
+        <p style="font-weight:600;font-size:13px;margin-bottom:10px;">➕ Item Add Karein</p>
+        <div class="form-3col">
+          <input type="text" id="item-name" placeholder="Item naam"/>
+          <input type="number" id="item-price" placeholder="Rs." min="0"/>
+          <input type="number" id="item-qty" placeholder="Qty" min="1" value="1"/>
+        </div>
+        <button class="btn btn-primary" style="margin-top:0;" onclick="addItem()">+ Add Karein</button>
+      </div>
+      <div class="table-wrap" style="border-radius:0;border-top:none;">
+        <table><thead><tr><th>Item</th><th>Rs.</th><th>Qty</th><th>Total</th><th></th></tr></thead>
+        <tbody id="items-body"><tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--muted);">Koi item nahi — upar se add karein</td></tr></tbody></table>
+      </div>
+      <div class="total-bar" style="border-radius:0 0 var(--radius) var(--radius);"><span class="total-label">Kul Hisaab</span><span class="total-amount" id="grand-total">Rs. 0</span></div>
+    </div>
+    <div id="content-report" style="display:none;"><div id="report-body"></div></div>
+    <div id="content-account" style="display:none;">
+      <div class="card">
+        <p style="font-weight:600;font-size:16px;" id="acc-shop">Ali Store</p>
+        <p style="color:var(--muted);font-size:13px;margin-top:2px;" id="acc-email">ali@gmail.com</p>
+        <div style="margin:14px 0;border-top:1px solid var(--border);padding-top:14px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;"><span style="color:var(--muted);">Current Plan</span><span style="font-weight:600;" id="acc-plan">Free</span></div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:8px;font-size:13px;"><span style="color:var(--muted);">Status</span><span id="acc-status">Trial</span></div>
+          <div style="display:flex;justify-content:space-between;font-size:13px;"><span style="color:var(--muted);">Expiry</span><span id="acc-expiry">—</span></div>
+        </div>
+        <button class="btn btn-primary" onclick="showScreen('screen-plans')">⬆️ Plan Upgrade Karein</button>
+        <button class="btn btn-outline" onclick="doLogout()">🚪 Logout</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="screen-admin" class="screen">
+  <div class="app-header">
+    <div><h1>🛡️ Admin Panel</h1><div class="sub">Sab Users Manage Karein</div></div>
+    <div class="header-right"><span class="badge badge-active">Admin</span><button class="logout-btn" onclick="doLogout()">Logout</button></div>
+  </div>
+  <div class="page">
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-label">Kul Users</div><div class="stat-value" id="adm-total">0</div></div>
+      <div class="stat-box"><div class="stat-label">Active Paid</div><div class="stat-value" id="adm-active" style="color:var(--green);">0</div></div>
+      <div class="stat-box"><div class="stat-label">Monthly</div><div class="stat-value" id="adm-earn" style="font-size:13px;margin-top:6px;">Rs.0</div></div>
+    </div>
+    <div class="field" style="margin-bottom:10px;"><input type="text" id="adm-search" placeholder="🔍 Email ya naam se search..." oninput="filterUsers(this.value)" style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:10px 14px;width:100%;font-family:inherit;"/></div>
+    <div id="admin-users-list"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-activate">
+<div class="modal-box">
+  <h3 id="modal-title">Account Activate Karein</h3>
+  <p id="modal-desc">Plan aur duration choose karein</p>
+  <div class="field"><label>Plan</label><select id="modal-plan"><option value="basic">Basic — Rs.500/month</option><option value="pro">Pro — Rs.1,500/month</option></select></div>
+  <div class="field"><label>Duration</label><select id="modal-dur"><option value="1">1 Mahina</option><option value="3">3 Mahine</option><option value="6">6 Mahine</option><option value="12">1 Saal</option></select></div>
+  <div class="field"><label>Transaction ID (optional)</label><input type="text" id="modal-txn" placeholder="EP-XXXX"/></div>
+  <button class="btn btn-green" onclick="confirmActivate()">✅ Activate Karein</button>
+  <button class="btn btn-outline" onclick="closeModal()">Ruk Jao</button>
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const CONFIG={adminEmail:'admin@dukaan.com',adminPass:'admin123',easypaisa:'03001234567',appName:'Dukaan Hisaab'};
+let users=[
+  {id:1,name:'Ali Hassan',email:'ali@gmail.com',phone:'03001111111',pass:'1234',plan:'trial',status:'trial',joined:'01-May-2026',expiry:'08-May-2026',txn:''},
+  {id:2,name:'Sara Khan',email:'sara@gmail.com',phone:'03002222222',pass:'1234',plan:'basic',status:'active',joined:'01-Apr-2026',expiry:'01-Jun-2026',txn:'EP-4421'},
+  {id:3,name:'Bilal Store',email:'bilal@gmail.com',phone:'03003333333',pass:'1234',plan:'free',status:'expired',joined:'01-Mar-2026',expiry:'08-Mar-2026',txn:''},
+  {id:4,name:'Zara Boutique',email:'zara@gmail.com',phone:'03004444444',pass:'1234',plan:'pro',status:'active',joined:'01-May-2026',expiry:'01-Jun-2026',txn:'JC-9923'},
+];
+let filteredUsers=[...users],activeUserId=null,currentUser=null,items=[],selectedPlan='basic';
+
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0);}
+
+function doLogin(){
+  const email=document.getElementById('login-email').value.trim();
+  const pass=document.getElementById('login-pass').value;
+  const err=document.getElementById('login-error');err.style.display='none';
+  if(email===CONFIG.adminEmail&&pass===CONFIG.adminPass){currentUser={name:'Admin',email:CONFIG.adminEmail,role:'admin'};renderAdmin();showScreen('screen-admin');return;}
+  const u=users.find(u=>u.email===email&&u.pass===pass);
+  if(u){currentUser=u;enterApp(u);}else{err.style.display='block';}
+}
+
+function doRegister(){
+  const shop=document.getElementById('reg-shop').value.trim();
+  const email=document.getElementById('reg-email').value.trim();
+  const phone=document.getElementById('reg-phone').value.trim();
+  const pass=document.getElementById('reg-pass').value;
+  const err=document.getElementById('reg-error');err.style.display='none';
+  if(!shop||!email||!phone||pass.length<6){err.style.display='block';err.textContent='Sab fields bharein, password min 6!';return;}
+  if(users.find(u=>u.email===email)){err.style.display='block';err.textContent='Yeh email pehle se registered hai!';return;}
+  const expiry=new Date();expiry.setDate(expiry.getDate()+7);
+  const nu={id:Date.now(),name:shop,email,phone,pass,plan:'trial',status:'trial',joined:formatDate(new Date()),expiry:formatDate(expiry),txn:''};
+  users.push(nu);filteredUsers=[...users];currentUser=nu;
+  showToast('✅ Account ban gaya! 7 din free trial shuru!');enterApp(nu);
+}
+
+function doLogout(){currentUser=null;items=[];showScreen('screen-login');}
+
+function enterApp(u){
+  document.getElementById('header-shop').textContent='🏪 '+u.name;
+  document.getElementById('header-email').textContent=u.email;
+  document.getElementById('acc-shop').textContent=u.name;
+  document.getElementById('acc-email').textContent=u.email;
+  document.getElementById('acc-plan').textContent=planLabel(u.plan);
+  document.getElementById('acc-status').textContent=u.status==='active'?'✅ Active':u.status==='trial'?'⏳ Trial':'❌ Expired';
+  document.getElementById('acc-expiry').textContent=u.expiry||'—';
+  const badge=document.getElementById('header-badge');
+  badge.textContent=planLabel(u.plan);badge.className='badge badge-'+(u.status==='active'?'active':u.status==='trial'?'trial':'expired');
+  document.getElementById('st-plan').textContent=planLabel(u.plan);
+  showAppAlert(u);renderItems();renderStats();showScreen('screen-app');
+}
+
+function showAppAlert(u){
+  const el=document.getElementById('app-alert');
+  if(u.status==='trial'){el.innerHTML=`<div class="alert alert-warning">⏳ Free trial! Upgrade: EasyPaisa <strong>${CONFIG.easypaisa}</strong> — Rs.500/month</div>`;}
+  else if(u.status==='expired'){el.innerHTML=`<div class="alert" style="background:var(--red-bg);color:var(--red);">❌ Plan expire ho gaya! EasyPaisa: <strong>${CONFIG.easypaisa}</strong></div>`;}
+  else{el.innerHTML=`<div class="alert alert-success">✅ ${planLabel(u.plan)} Plan Active — Expiry: ${u.expiry}</div>`;}
+}
+
+function addItem(){
+  const name=document.getElementById('item-name').value.trim();
+  const price=parseFloat(document.getElementById('item-price').value);
+  const qty=parseInt(document.getElementById('item-qty').value)||1;
+  if(!name||isNaN(price)||price<0){showToast('❌ Item naam aur qeemat darain!');return;}
+  if(currentUser.plan==='free'&&items.length>=10){showToast('❌ Free plan: sirf 10 items! Upgrade karein.');return;}
+  items.push({id:Date.now(),name,price,qty});
+  document.getElementById('item-name').value='';document.getElementById('item-price').value='';document.getElementById('item-qty').value='1';
+  renderItems();renderStats();
+}
+
+function deleteItem(id){items=items.filter(i=>i.id!==id);renderItems();renderStats();}
+
+function renderItems(){
+  const tbody=document.getElementById('items-body');
+  if(!items.length){tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:1.5rem;color:var(--muted);">Koi item nahi</td></tr>';document.getElementById('grand-total').textContent='Rs. 0';return;}
+  let total=0;
+  tbody.innerHTML=items.map(it=>{const lt=it.price*it.qty;total+=lt;return`<tr><td>${it.name}</td><td>Rs.${it.price.toLocaleString()}</td><td>${it.qty}</td><td>Rs.${lt.toLocaleString()}</td><td><button class="del-btn" onclick="deleteItem(${it.id})">🗑</button></td></tr>`;}).join('');
+  document.getElementById('grand-total').textContent='Rs. '+total.toLocaleString();
+}
+
+function renderStats(){const t=items.reduce((s,i)=>s+i.price*i.qty,0);document.getElementById('st-items').textContent=items.length;document.getElementById('st-sales').textContent='Rs.'+t.toLocaleString();}
+
+function switchTab(tab){
+  ['hisaab','report','account'].forEach(t=>{document.getElementById('tab-'+t).classList.toggle('active',t===tab);document.getElementById('content-'+t).style.display=t===tab?'block':'none';});
+  if(tab==='report')renderReport();
+}
+
+function renderReport(){
+  const el=document.getElementById('report-body');
+  if(currentUser.plan==='free'||currentUser.status==='expired'){el.innerHTML=`<div class="card"><div class="lock-box"><div class="lock-icon">🔒</div><h3>Report Sirf Paid Plan Mein</h3><p>Basic ya Pro plan lo</p><button class="btn btn-primary" onclick="showScreen('screen-plans')">⬆️ Upgrade — Rs.500/month</button></div></div>`;return;}
+  const total=items.reduce((s,i)=>s+i.price*i.qty,0);
+  const avg=items.length?Math.round(total/items.length):0;
+  el.innerHTML=`<div class="card"><p style="font-weight:600;font-size:15px;margin-bottom:14px;">📊 Aaj Ki Report</p><div class="stats-grid"><div class="stat-box"><div class="stat-label">Items</div><div class="stat-value">${items.length}</div></div><div class="stat-box"><div class="stat-label">Total Sales</div><div class="stat-value" style="font-size:14px;">Rs.${total.toLocaleString()}</div></div><div class="stat-box"><div class="stat-label">Average</div><div class="stat-value" style="font-size:14px;">Rs.${avg.toLocaleString()}</div></div></div><button class="btn btn-primary" style="margin-top:10px;" onclick="window.print()">🖨️ Print Karein</button></div>`;
+}
+
+function selectPlan(p){selectedPlan=p;['free','basic','pro'].forEach(x=>document.getElementById('pc-'+x).classList.toggle('selected',x===p));}
+selectPlan('basic');
+function confirmPlan(){if(selectedPlan==='free'){goToApp();return;}showToast(`Payment bhejein: EasyPaisa ${CONFIG.easypaisa}`);setTimeout(goToApp,2000);}
+function goToApp(){if(currentUser)enterApp(currentUser);else showScreen('screen-login');}
+
+function renderAdmin(){
+  const active=users.filter(u=>u.status==='active').length;
+  const earn=users.filter(u=>u.status==='active').reduce((s,u)=>s+(u.plan==='pro'?1500:500),0);
+  document.getElementById('adm-total').textContent=users.length;
+  document.getElementById('adm-active').textContent=active;
+  document.getElementById('adm-earn').textContent='Rs.'+earn.toLocaleString();
+  renderUserCards(filteredUsers);
+}
+
+function filterUsers(q){const ql=q.toLowerCase();filteredUsers=users.filter(u=>u.name.toLowerCase().includes(ql)||u.email.toLowerCase().includes(ql));renderUserCards(filteredUsers);}
+
+function renderUserCards(list){
+  const el=document.getElementById('admin-users-list');
+  if(!list.length){el.innerHTML='<div class="card" style="text-align:center;color:var(--muted);">Koi user nahi mila</div>';return;}
+  el.innerHTML=list.map(u=>`<div class="user-card"><div class="user-top"><div><div class="user-name">🏪 ${u.name}</div><div class="user-email">${u.email} • ${u.phone||'—'}</div></div><span class="badge badge-${u.status==='active'?'active':u.status==='trial'?'trial':'expired'}">${u.status==='active'?'✅ Active':u.status==='trial'?'⏳ Trial':'❌ Expired'}</span></div><div style="font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;"><span>📅 ${u.joined}</span><span>⏰ ${u.expiry}</span><span>💳 ${u.txn||'Payment nahi'}</span></div><div class="user-actions">${u.status!=='active'?`<button class="btn btn-sm btn-green" onclick="openActivate(${u.id})">✅ Activate</button>`:`<button class="btn btn-sm btn-outline" onclick="openActivate(${u.id})">📅 Extend</button>`}${u.status==='active'?`<button class="btn btn-sm btn-red" onclick="deactivate(${u.id})">❌ Deactivate</button>`:''}<button class="btn btn-sm btn-outline" onclick="copyWA(${u.id})">📱 WhatsApp Msg</button></div></div>`).join('');
+}
+
+function openActivate(id){activeUserId=id;const u=users.find(u=>u.id===id);document.getElementById('modal-title').textContent=u.name+' — Activate';document.getElementById('modal-desc').textContent=u.email;document.getElementById('modal-activate').classList.add('open');}
+function closeModal(){document.getElementById('modal-activate').classList.remove('open');activeUserId=null;}
+function confirmActivate(){
+  const u=users.find(u=>u.id===activeUserId);if(!u)return;
+  const plan=document.getElementById('modal-plan').value;
+  const months=parseInt(document.getElementById('modal-dur').value);
+  const txn=document.getElementById('modal-txn').value||'Manual';
+  const expiry=new Date();expiry.setMonth(expiry.getMonth()+months);
+  u.plan=plan;u.status='active';u.expiry=formatDate(expiry);u.txn=txn;
+  filteredUsers=[...users];closeModal();renderAdmin();showToast('✅ '+u.name+' activate ho gaya!');
+}
+function deactivate(id){const u=users.find(u=>u.id===id);if(!u)return;u.status='expired';u.plan='free';filteredUsers=[...users];renderAdmin();showToast('⚠️ '+u.name+' deactivate ho gaya');}
+function copyWA(id){
+  const u=users.find(u=>u.id===id);
+  const msg=u.status==='active'?`Assalam o Alaikum ${u.name}!\n\nAapka ${planLabel(u.plan)} plan ${u.expiry} ko expire ho raha hai.\nRenew karein:\n📱 EasyPaisa: ${CONFIG.easypaisa}\n💰 Amount: Rs.${u.plan==='pro'?1500:500}/month\n\nShukria! 🙏`:`Assalam o Alaikum ${u.name}!\n\nAapka free trial khatam hone wala hai.\n\nBasic Plan: Rs.500/month\n📱 EasyPaisa: ${CONFIG.easypaisa}\n\nPayment ke baad account activate ho jayega! 🚀`;
+  navigator.clipboard.writeText(msg).catch(()=>{});showToast('📱 WhatsApp message copy ho gaya!');
+}
+function planLabel(p){return{free:'Free',trial:'Trial',basic:'Basic',pro:'Pro'}[p]||'Free';}
+function formatDate(d){return new Date(d).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'}).replace(/ /g,'-');}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',3500);}
+</script>
+</body>
+</html>
